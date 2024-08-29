@@ -27,7 +27,7 @@ namespace ViaroAPP.Server.Controllers
         }
 
         //Función de insert
-        [HttpPut("insert_Profesor")]
+        [HttpPut("insert_profesor")]
         public IActionResult InsertProfesor(Profesor Profesor)
         {
             try
@@ -54,7 +54,7 @@ namespace ViaroAPP.Server.Controllers
             return NoContent();
         }
         //Función de update
-        [HttpPut("update_Profesor")]
+        [HttpPut("update_profesor")]
         public IActionResult UpdateProfesor(Profesor Profesor)
         {
             try
@@ -69,7 +69,6 @@ namespace ViaroAPP.Server.Controllers
                         cmd.Parameters.AddWithValue("@nombre", Profesor.nombre);
                         cmd.Parameters.AddWithValue("@apellidos", Profesor.apellidos);
                         cmd.Parameters.AddWithValue("@genero", Profesor.genero);
-
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -82,7 +81,7 @@ namespace ViaroAPP.Server.Controllers
             return NoContent();
         }
         //Función de delete
-        [HttpDelete("delete_Profesor")]
+        [HttpPut("delete_profesor")]
         public IActionResult DeleteProfesor(Profesor Profesor)
         {
             try

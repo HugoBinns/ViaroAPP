@@ -42,9 +42,9 @@ namespace ViaroAPP.Server.Controllers
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@id", AlumnoGrado.id);
-                        cmd.Parameters.AddWithValue("@nombre", AlumnoGrado.alumnoid);
-                        cmd.Parameters.AddWithValue("@apellidos", AlumnoGrado.gradoid);
-                        cmd.Parameters.AddWithValue("@genero", AlumnoGrado.seccion);
+                        cmd.Parameters.AddWithValue("@alumnoid", AlumnoGrado.alumnoid);
+                        cmd.Parameters.AddWithValue("@gradoid", AlumnoGrado.gradoid);
+                        cmd.Parameters.AddWithValue("@seccion", AlumnoGrado.seccion);
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -69,9 +69,9 @@ namespace ViaroAPP.Server.Controllers
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@id", AlumnoGrado.id);
-                        cmd.Parameters.AddWithValue("@nombre", AlumnoGrado.alumnoid);
-                        cmd.Parameters.AddWithValue("@apellidos", AlumnoGrado.gradoid);
-                        cmd.Parameters.AddWithValue("@genero", AlumnoGrado.seccion);
+                        cmd.Parameters.AddWithValue("@alumnoid", AlumnoGrado.alumnoid);
+                        cmd.Parameters.AddWithValue("@gradoid", AlumnoGrado.gradoid);
+                        cmd.Parameters.AddWithValue("@seccion", AlumnoGrado.seccion);
                         cmd.ExecuteNonQuery();
                     }
                 };

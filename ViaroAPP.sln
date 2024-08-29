@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViaroAPP.Server", "ViaroAPP\Server\ViaroAPP.Server.csproj", "{3F0798DD-04EF-46F4-920F-83B4D405551E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViaroAPP.Server", "ViaroAPP\Server\ViaroAPP.Server.csproj", "{3F0798DD-04EF-46F4-920F-83B4D405551E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViaroAPP.Client", "ViaroAPP\Client\ViaroAPP.Client.csproj", "{34AC5917-EAE3-4A2F-BACF-ACD9710AFB99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViaroAPP.Client", "ViaroAPP\Client\ViaroAPP.Client.csproj", "{34AC5917-EAE3-4A2F-BACF-ACD9710AFB99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViaroAPP.Shared", "ViaroAPP\Shared\ViaroAPP.Shared.csproj", "{7FEFC267-629A-4AD7-AD71-4BD4D600A1E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViaroAPP.Shared", "ViaroAPP\Shared\ViaroAPP.Shared.csproj", "{7FEFC267-629A-4AD7-AD71-4BD4D600A1E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

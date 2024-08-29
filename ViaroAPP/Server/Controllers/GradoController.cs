@@ -29,7 +29,7 @@ namespace ViaroAPP.Server.Controllers
 
 
         //Función de insert
-        [HttpPut("insert_Grado")]
+        [HttpPut("insert_grado")]
         public IActionResult InsertGrado(Grado Grado)
         {
             try
@@ -42,7 +42,7 @@ namespace ViaroAPP.Server.Controllers
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@id", Grado.id);
                         cmd.Parameters.AddWithValue("@nombre", Grado.nombre);
-                        cmd.Parameters.AddWithValue("@apellidos", Grado.profesorid);
+                        cmd.Parameters.AddWithValue("@profesorid", Grado.profesorid);
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -55,7 +55,7 @@ namespace ViaroAPP.Server.Controllers
             return NoContent();
         }
         //Función de update
-        [HttpPut("update_Grado")]
+        [HttpPut("update_grado")]
         public IActionResult UpdateGrado(Grado Grado)
         {
             try
@@ -68,7 +68,7 @@ namespace ViaroAPP.Server.Controllers
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@id", Grado.id);
                         cmd.Parameters.AddWithValue("@nombre", Grado.nombre);
-                        cmd.Parameters.AddWithValue("@apellidos", Grado.profesorid);
+                        cmd.Parameters.AddWithValue("@profesorid", Grado.profesorid);
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -81,7 +81,7 @@ namespace ViaroAPP.Server.Controllers
             return NoContent();
         }
         //Función de delete
-        [HttpDelete("delete_Grado")]
+        [HttpPut("delete_grado")]
         public IActionResult DeleteGrado(Grado Grado)
         {
             try
