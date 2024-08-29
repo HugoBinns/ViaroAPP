@@ -1,0 +1,338 @@
+﻿@page "/"
+@inject NotificationService NotificationService
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+@using ViaroAPP.Shared
+@using Radzen
+@using Radzen.Blazor
+
+<PageTitle>Viaro app</PageTitle>
+
+<h1>Alumnos</h1>
+
+<RadzenRow>
+    <RadzenColumn>
+        <RadzenRow>
+            <RadzenLabel Text="Selecciona la accion" Component="DropDownOpcion" />
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenDropDown TValue="string" @bind-Value=@SelectedOpcion Data="@Opciones" Style="width: 100%; max-width: 400px;" Name="DropDownOpcion" />
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenButton Text="Accion" Click="@(args => UpDateAlumno())" Style="width: 100%" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn>
+        
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow>
+    <RadzenDataGrid @ref="GridAlumno" TItem="Alumno" AllowFiltering="true" AllowColumnResize="true" AllowPaging="true" PageSize="5" AllowSorting="true" Data="@alumno" ColumnWidth="200px" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selected_alumno>
+        <Columns>
+            <RadzenDataGridColumn Property="@nameof(Alumno.id)" Filterable="true" Title="ID" Width="150px" Frozen="true"/>
+            <RadzenDataGridColumn Property="@nameof(Alumno.nombre)" Filterable="true" Title="Nombre" Width="280px">
+                <EditTemplate Context="alumno">
+                    <RadzenTextBox @bind-Value="alumno.nombre" Style="width:280px;display:block" Name="Nombre"/>
+                    <RadzenRequiredValidator Text="Nombre en blanco" Component="Nombre" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(Alumno.apellidos)" Filterable="true" Title="Apellidos" Width="300px">
+                <EditTemplate Context="alumno">
+                    <RadzenTextBox @bind-Value="alumno.apellidos" Style="width:300px;display:block" Name="Apellidos"/>
+                    <RadzenRequiredValidator Text="Apellidos en blanco" Component="Apellidos" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(Alumno.Genero)" Filterable="true" Title="Género" Width="110px">
+                <EditTemplate Context="alumno">
+                    <RadzenTextBox @bind-Value="alumno.Genero" Style="width:110px;display:block" Name="Genero"/>
+                    <RadzenRequiredValidator Text="Género en blanco" Component="Genero" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(Alumno.fecha_nacimiento)" Filterable="true" Title="Fecha de Nacimiento" Width="230px">
+                <Template Context="alumno">
+                    @String.Format("{0:d}", alumno.fecha_nacimiento)
+                </Template>
+                <EditTemplate Context="alumno">
+                    <RadzenDatePicker @bind-Value="alumno.fecha_nacimiento" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select la fecha de nacimiento" }})"></RadzenDatePicker>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="alumno" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="80px"> 
+                <Template Context="alumno">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" @onclick:stopPropagation="true"></RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="alumno">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" aria-label="Save">
+                    </RadzenButton>
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" aria-label="Cancel">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" aria-label="Delete">
+                    </RadzenButton>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenRow>
+
+
+
+@code {
+    public RadzenDataGrid<Alumno> GridAlumno;
+    public List<Alumno> alumno = new List<Alumno>();
+    public List<Alumno> alu = new List<Alumno>();
+    public IList<Alumno> selected_alumno;
+
+    public RadzenDataGrid<Profesor> GridProfesor;
+    public List<Profesor> profesor = new List<Profesor>();
+    public IList<Profesor> selected_profesor;
+
+    public RadzenDataGrid<Grado> GridGrado;
+    public List<Grado> grado = new List<Grado>();
+    public IList<Grado> selected_grado;
+
+    public RadzenDataGrid<AlumnoGrado> GridAlumnoGrado;
+    public List<AlumnoGrado> alumnogrado = new List<AlumnoGrado>();
+    public IList<AlumnoGrado> selected_alumnogrado;
+
+    public List<string> Opciones = new List<string> { "Insertar", "Actualizar", "Eliminar" };
+    public string? SelectedOpcion { get; set; }
+
+    public string? nombreAlumno;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var responseAlumno = await Http.GetFromJsonAsync<List<Alumno>>("api/Alumno");
+            alumno = responseAlumno.ToList();
+
+            foreach (var alu in alumno)
+            {
+                Console.WriteLine($"{alu.id}, {alu.nombre}, {alu.apellidos}");
+            }
+
+            var responseProfesor = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+            profesor = responseProfesor.ToList();
+
+            var responseGrado = await Http.GetFromJsonAsync<List<Grado>>("api/Grado");
+            grado = responseGrado.ToList();
+
+            var responseAlumnoGrado = await Http.GetFromJsonAsync<List<AlumnoGrado>>("api/AlumnoGrado");
+            alumnogrado = responseAlumnoGrado.ToList();
+
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public async Task UpDateAlumno()
+    {
+        try
+        {
+            if (SelectedOpcion == "Insertar")
+            {
+                var id = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa el id");
+                var nombre = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa el nombre");
+                var apellidos = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa los apellidos");
+                var genero = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa el género");
+                var fecnac = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa la fecha de nacimiento");
+
+                if (string.IsNullOrEmpty(nombre))
+                {
+                    nombre = "";
+                }
+                if (string.IsNullOrEmpty(apellidos))
+                {
+                    apellidos = "";
+                }
+                if (string.IsNullOrEmpty(genero))
+                {
+                    genero = "";
+                }
+                if (string.IsNullOrEmpty(fecnac))
+                {
+                    fecnac = DateTime.MinValue.ToString();
+                }
+
+                if (alumno.Contains(new Alumno { id = id.ToUpper() }))
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", $"Ya existe un alumno con el id {id}");
+                }
+                else
+                {
+                    Alumno alumnoAux = new Alumno { id = id.ToUpper(), nombre = nombre, apellidos = apellidos, Genero = genero.ToUpper(), fecha_nacimiento = DateTime.Parse(fecnac) };
+                    var responseInsertAlumno = await Http.PutAsJsonAsync("api/Alumno/insert_alumno", alumnoAux);
+                    if (responseInsertAlumno.IsSuccessStatusCode)
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", $"Se ha ingresado al alumno {id}, con nombre {nombre} correctamente");
+                    }
+                    else
+                    {
+                        var InsertResponse = await responseInsertAlumno.Content.ReadAsStringAsync();
+                        throw new Exception(InsertResponse);
+                    }
+                }
+            }
+            else if (SelectedOpcion == "Actualizar")
+            {
+                var id = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el ID del alumno que desea actualizar");
+                if (alumno.Contains(new Alumno { id = id.ToUpper() }))
+                {
+                    var responseAlumno = await Http.GetFromJsonAsync<List<Alumno>>($"api/Alumno/{id}");
+                    alu = responseAlumno.ToList();
+
+                    var nombre = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa el nombre");
+                    var apellidos = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa los apellidos");
+                    var genero = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa el género");
+                    var fecnac = await JSRuntime.InvokeAsync<string>("prompt", "Ingresa la fecha de nacimiento");
+
+                    if (string.IsNullOrEmpty(nombre))
+                    {
+                        nombre = alu.Last().nombre;
+                    }
+                    if (string.IsNullOrEmpty(apellidos))
+                    {
+                        apellidos = alu.Last().apellidos;
+                    }
+                    if (string.IsNullOrEmpty(genero))
+                    {
+                        genero = alu.Last().Genero;
+                    }
+                    if (string.IsNullOrEmpty(fecnac))
+                    {
+                        fecnac = alu.Last().fecha_nacimiento.ToString();
+                    }
+
+                    Alumno alumnoAux = new Alumno { id = id.ToUpper(), nombre = nombre, apellidos = apellidos, Genero = genero, fecha_nacimiento = DateTime.Parse(fecnac) };
+                    var responseDeleteAlumno = await Http.PutAsJsonAsync("api/Alumno/update_alumno", alumnoAux);
+                    if (responseDeleteAlumno.IsSuccessStatusCode)
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", $"Se ha actualizado al alumno {id}");
+                    }
+                    else
+                    {
+                        var DeleteResponse = await responseDeleteAlumno.Content.ReadAsStringAsync();
+                        throw new Exception(DeleteResponse);
+                    }
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", $"No existe un alumno con el id {id}");
+                }
+            }
+            else if (SelectedOpcion == "Eliminar")
+            {
+                var id = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el ID del alumno que desea eliminar");
+                if (alumno.Contains(new Alumno { id = id.ToUpper() }))
+                {
+                    Alumno alumnoAux = new Alumno { id = id.ToUpper() };
+                    var responseDeleteAlumno = await Http.PutAsJsonAsync("api/Alumno/delete_alumno", alumnoAux);
+                    if (responseDeleteAlumno.IsSuccessStatusCode)
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", $"Se ha eliminado al alumno {id}");
+                    }
+                    else
+                    {
+                        var DeleteResponse = await responseDeleteAlumno.Content.ReadAsStringAsync();
+                        throw new Exception(DeleteResponse);
+                    }
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", $"No existe un alumno con el id {id}");
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al insertar al alumno {ex.Message}");
+        }
+        finally
+        {
+            await Refresh();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    //Funcion para editar alumnos
+    public async Task EditarAlumnos()
+    {
+        
+    }
+
+    //Funcion para eliminar alumnos
+    public async Task EliminarAlumno(Alumno alumno)
+    {
+        try
+        {
+            var responseDeleteAlumno = await Http.PutAsJsonAsync("api/Alumno/delete_alumno", alumno);
+            if (responseDeleteAlumno.IsSuccessStatusCode)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Se ha eliminado al alumno {alumno.nombre} {alumno.apellidos}, con ID {alumno.id}");
+            }
+            else
+            {
+                var DeleteResponse = await responseDeleteAlumno.Content.ReadAsStringAsync();
+                throw new Exception(DeleteResponse);
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al eliminar al alumno {alumno.id}. {ex.Message}");
+        }
+        finally
+        {
+            await Refresh();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+
+    public async Task Refresh()
+    {
+        try
+        {
+            var responseAlumno = await Http.GetFromJsonAsync<List<Alumno>>("api/Alumno");
+            alumno = responseAlumno.ToList();
+
+            foreach (var alu in alumno)
+            {
+                Console.WriteLine($"{alu.id}, {alu.nombre}, {alu.apellidos}");
+            }
+
+            var responseProfesor = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
+            profesor = responseProfesor.ToList();
+
+            var responseGrado = await Http.GetFromJsonAsync<List<Grado>>("api/Grado");
+            grado = responseGrado.ToList();
+
+            var responseAlumnoGrado = await Http.GetFromJsonAsync<List<AlumnoGrado>>("api/AlumnoGrado");
+            alumnogrado = responseAlumnoGrado.ToList();
+
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    
+
+}
+
