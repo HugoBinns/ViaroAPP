@@ -75,7 +75,7 @@ namespace ViaroAPP.Server.Controllers
                         cmd.Parameters.AddWithValue("@nombre", alumno.nombre);
                         cmd.Parameters.AddWithValue("@apellidos", alumno.apellidos);
                         cmd.Parameters.AddWithValue("@genero", alumno.Genero);
-
+                        cmd.Parameters.AddWithValue("@fecha_nacimiento", alumno.fecha_nacimiento);
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -110,40 +110,6 @@ namespace ViaroAPP.Server.Controllers
             }
 
             return NoContent();
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<List<Alumno>>> GetAlumnoById(string id)
-        {
-            var alumnos = new List<Alumno>();
-
-            using (SqlConnection conn = new SqlConnection(_context.Database.GetConnectionString()))
-            {
-                using (SqlCommand cmd = new SqlCommand("sp_SelectAlumno", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@id", id);
-
-                    conn.Open();
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (reader.Read())
-                        {
-                            var alumno = new Alumno
-                            {
-                                id = reader["id"].ToString(),
-                                nombre = reader["nombre"]?.ToString(),
-                                apellidos = reader["apellidos"]?.ToString(),
-                                Genero = reader["Genero"]?.ToString(),
-                                fecha_nacimiento = reader["fecha_nacimiento"] as DateTime?
-                            };
-                            alumnos.Add(alumno);
-                        }
-                    }
-                }
-            }
-
-            return Ok(alumnos);
         }
     }
 }
