@@ -101,7 +101,6 @@
                     </RadzenButton>
                 </EditTemplate>
             </RadzenDataGridColumn>
-
         </Columns>
     </RadzenDataGrid>
 </RadzenRow>
@@ -138,7 +137,6 @@
             await InvokeAsync(StateHasChanged);
         }
     }
-
 
     //------------------------------------------------------------------------------Funciones del Alummno--------------------------------------------------------------------------------------
     //Evento OnUpDate del Grid
@@ -179,6 +177,7 @@
     {
         try
         {
+           
             var id = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el ID");
             var nombre = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Nombre");
             var apellidos = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese los Apellidos");
@@ -186,8 +185,9 @@
             var fecnac = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese la fecha de nacimiento");
 
             var alumnoAux = new Alumno { id = id.ToUpper(), nombre = nombre, apellidos = apellidos, Genero = genero.ToUpper(), fecha_nacimiento = DateTime.Parse(fecnac) };
-
             await InsertAlumno(alumnoAux);
+
+            
         }
         catch (Exception ex)
         {
@@ -234,6 +234,7 @@
     {
         try
         {
+
             var responseUpdateAlumno = await Http.PutAsJsonAsync("api/Alumno/update_alumno", alumno);
             if (responseUpdateAlumno.IsSuccessStatusCode)
             {
@@ -244,6 +245,7 @@
                 var UpdateResponse = await responseUpdateAlumno.Content.ReadAsStringAsync();
                 throw new Exception(UpdateResponse);
             }
+            
         }
         catch(Exception ex)
         {
@@ -261,15 +263,20 @@
     {
         try
         {
-            var responseDeleteAlumno = await Http.PutAsJsonAsync("api/Alumno/delete_alumno", alumno);
-            if (responseDeleteAlumno.IsSuccessStatusCode)
+            bool Confirmacion = await JSRuntime.InvokeAsync<bool>("confirm", "Desea eliminar al alumno?");
+
+            if (Confirmacion)
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Se ha eliminado al alumno {alumno.nombre} {alumno.apellidos}, con ID: {alumno.id}");
-            }
-            else
-            {
-                var DeleteResponse = await responseDeleteAlumno.Content.ReadAsStringAsync();
-                throw new Exception(DeleteResponse);
+                var responseDeleteAlumno = await Http.PutAsJsonAsync("api/Alumno/delete_alumno", alumno);
+                if (responseDeleteAlumno.IsSuccessStatusCode)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", $"Se ha eliminado al alumno {alumno.nombre} {alumno.apellidos}, con ID: {alumno.id}");
+                }
+                else
+                {
+                    var DeleteResponse = await responseDeleteAlumno.Content.ReadAsStringAsync();
+                    throw new Exception(DeleteResponse);
+                }
             }
         }
         catch (Exception ex)

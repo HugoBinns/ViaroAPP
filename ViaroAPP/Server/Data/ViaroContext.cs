@@ -20,8 +20,6 @@ namespace ViaroAPP.Server.Data
             modelBuilder.Entity<Profesor>().HasKey(p => p.id);
             modelBuilder.Entity<Grado>().HasKey(g => g.id);
             modelBuilder.Entity<AlumnoGrado>().HasKey(x => x.id);
-
-          
         }
     }
 }

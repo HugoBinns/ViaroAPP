@@ -11,7 +11,7 @@ namespace ViaroAPP.Shared
     {
         public string id { get; set; }
         public string? nombre { get; set; }
-        public string? profesorid { get; set; }
+        public string profesorid { get; set; }
 
         public override bool Equals(object? obj)
         {
@@ -21,7 +21,7 @@ namespace ViaroAPP.Shared
             }
 
             Grado other = (Grado)obj;
-            return id == other.id;
+            return (id == other.id);
         }
 
         public override int GetHashCode()
