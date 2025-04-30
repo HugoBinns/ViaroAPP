@@ -13,9 +13,9 @@ namespace ViaroAPP.Server.Controllers
     [ApiController]
     public class PlanillaController : ControllerBase
     {
-        private readonly Data.PlanillaDbContext _context;
+        private readonly Data.AppDbContext _context;
 
-        public PlanillaController(Data.PlanillaDbContext context)
+        public PlanillaController(Data.AppDbContext context)
         {
             _context = context;
         }
@@ -23,7 +23,7 @@ namespace ViaroAPP.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Planilla>>> GetGrado()
         {
-            var listGrado = await _context.Grado.ToListAsync();
+            var listGrado = await _context.Planillas.ToListAsync();
             return Ok(listGrado);
         }
 

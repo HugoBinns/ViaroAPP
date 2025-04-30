@@ -17,9 +17,9 @@ namespace ViaroAPP.Server.Controllers
     [ApiController]
     public class EmpleadosController : ControllerBase
     {
-        private readonly Data.PlanillaDbContext _context;
+        private readonly Data.AppDbContext _context;
 
-        public EmpleadosController(Data.PlanillaDbContext context)
+        public EmpleadosController(Data.AppDbContext context)
         {
             _context = context;
         }
@@ -27,7 +27,7 @@ namespace ViaroAPP.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Empleado>>> GetAlumno()
         {
-            var listAlumno = await _context.Alumno.ToListAsync();
+            var listAlumno = await _context.Empleados.ToListAsync();
             return Ok(listAlumno);
         }
 

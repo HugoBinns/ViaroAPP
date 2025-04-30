@@ -9,5 +9,7 @@ namespace ViaroAPP.Server.Data.Entities
 
         [StringLength(30)]
         public string NombreCargo { get; set; }
+
+        public ICollection<Empleado> Empleados { get; set; }
     }
 }

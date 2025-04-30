@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ViaroAPP.Shared;
 
 namespace ViaroAPP.Server.Data.Entities
 {
@@ -9,5 +10,7 @@ namespace ViaroAPP.Server.Data.Entities
 
         [StringLength(30)]
         public string NombreCalculo { get; set; }
+
+        public ICollection<Planilla> Planillas { get; set; }
     }
 }
