@@ -17,9 +17,9 @@ namespace ViaroAPP.Server.Controllers
     [ApiController]
     public class EmpleadosController : ControllerBase
     {
-        private readonly ViaroContext _context;
+        private readonly Data.PlanillaDbContext _context;
 
-        public EmpleadosController(ViaroContext context)
+        public EmpleadosController(Data.PlanillaDbContext context)
         {
             _context = context;
         }

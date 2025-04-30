@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 //Aqui estamos registrando nuestro contexto de base de datos cuya configuracion esta en el appsettings.json
-builder.Services.AddDbContext<ViaroContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 builder.Services.AddControllers();

@@ -13,9 +13,9 @@ namespace ViaroAPP.Server.Controllers
     [ApiController]
     public class PlanillaController : ControllerBase
     {
-        private readonly ViaroContext _context;
+        private readonly Data.PlanillaDbContext _context;
 
-        public PlanillaController(ViaroContext context)
+        public PlanillaController(Data.PlanillaDbContext context)
         {
             _context = context;
         }

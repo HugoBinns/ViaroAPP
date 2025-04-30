@@ -3,9 +3,9 @@ using ViaroAPP.Shared;
 
 namespace ViaroAPP.Server.Data
 {
-    public class ViaroContext : DbContext
+    public class AppDbContext : DbContext
     {
-        public ViaroContext(DbContextOptions<ViaroContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         //Tablas
         public DbSet<Empleado> Alumno { get; set; }
