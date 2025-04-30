@@ -1,4 +1,4 @@
-﻿@page "/grados"
+﻿@page "/planilla"
 
 @inject NotificationService NotificationService
 @inject HttpClient Http
@@ -8,23 +8,23 @@
 @using Radzen
 @using Radzen.Blazor
 
-<h2>Grados</h2>
+<h2>Planilla</h2>
 
 
 <RadzenRow>
-    <RadzenDataGrid @ref="GridGrado" TItem="Grado" AllowFiltering="true" AllowColumnResize="true" AllowPaging="true" PageSize="3" AllowSorting="true" Data="@grado" RowUpdate="@OnUpdateRow" ColumnWidth="200px" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selected_grado EditMode="@editMode">
+    <RadzenDataGrid @ref="GridGrado" TItem="Planilla" AllowFiltering="true" AllowColumnResize="true" AllowPaging="true" PageSize="3" AllowSorting="true" Data="@grado" RowUpdate="@OnUpdateRow" ColumnWidth="200px" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selected_grado EditMode="@editMode">
         <HeaderTemplate>
             <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nuevo Grado" Click="@InsertRow" />
         </HeaderTemplate>
         <Columns>
-            <RadzenDataGridColumn Property="@nameof(Grado.id)" Filterable="true" Title="ID" Width="80px" Frozen="true" />
-            <RadzenDataGridColumn Property="@nameof(Grado.nombre)" Filterable="true" Title="Nombre" Width="280px">
+            <RadzenDataGridColumn Property="@nameof(Planilla.id)" Filterable="true" Title="ID" Width="80px" Frozen="true" />
+            <RadzenDataGridColumn Property="@nameof(Planilla.nombre)" Filterable="true" Title="Nombre" Width="280px">
                 <EditTemplate Context="grado">
                     <RadzenTextBox @bind-Value="grado.nombre" Style="width:280px;display:block" Name="Nombre" />
                     <RadzenRequiredValidator Text="Nombre en blanco" Component="Nombre" Popup="true" />
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn Property="@nameof(Grado.profesorid)" Filterable="true" Title="Profesor ID" Width="300px">
+            <RadzenDataGridColumn Property="@nameof(Planilla.profesorid)" Filterable="true" Title="Profesor ID" Width="300px">
                 <EditTemplate Context="grado">
                     <RadzenTextBox @bind-Value="grado.profesorid" Style="width:300px;display:block" Name="Profesor ID" />
                     <RadzenRequiredValidator Text="Profesor ID en blanco" Component="Profesor ID" Popup="true" />
@@ -50,35 +50,26 @@
 </RadzenRow>
 
 @code {
-    public RadzenDataGrid<Grado> GridGrado;
-    public List<Grado> grado = new List<Grado>();
-    public IList<Grado> selected_grado;
+    public RadzenDataGrid<Planilla> GridGrado;
+    public List<Planilla> grado = new List<Planilla>();
+    public IList<Planilla> selected_grado;
 
-    public RadzenDataGrid<AlumnoGrado> GridAlumnoGrado;
-    public List<AlumnoGrado> gradogrado = new List<AlumnoGrado>();
-    public IList<AlumnoGrado> selected_gradogrado;
 
     DataGridEditMode editMode = DataGridEditMode.Single;
 
-    public List<Alumno> alumno = new List<Alumno>();
-    public List<Profesor> profesor = new List<Profesor>();
+    public List<Empleado> alumno = new List<Empleado>();
 
     //Funcion Principal
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var responseGrado = await Http.GetFromJsonAsync<List<Grado>>("api/Grado");
+            var responseGrado = await Http.GetFromJsonAsync<List<Planilla>>("api/Grado");
             grado = responseGrado.ToList();
 
-            var responseAlumnoGrado = await Http.GetFromJsonAsync<List<AlumnoGrado>>("api/AlumnoGrado");
-            gradogrado = responseAlumnoGrado.ToList();
-
-            var responseAlumno = await Http.GetFromJsonAsync<List<Alumno>>("api/Alumno");
+            var responseAlumno = await Http.GetFromJsonAsync<List<Empleado>>("api/Alumno");
             alumno = responseAlumno.ToList();
 
-            var responseProfesor = await Http.GetFromJsonAsync<List<Profesor>>("api/Profesor");
-            profesor = responseProfesor.ToList();
         }
         catch (Exception ex)
         {
@@ -93,19 +84,19 @@
 
     //------------------------------------------------------------------------------Funciones del Alummno--------------------------------------------------------------------------------------
     //Evento OnUpDate del Grid
-    public async void OnUpdateRow(Grado grados)
+    public async void OnUpdateRow(Planilla grados)
     {
         await EditarGrados(grados);
     }
 
     //Este es el evento Edit
-    public async Task EditRow(Grado grado)
+    public async Task EditRow(Planilla grado)
     {
         await GridGrado.EditRow(grado);
     }
 
     //FuncionPara Guardar los cambios de la fila
-    public async Task SaveRow(Grado grados)
+    public async Task SaveRow(Planilla grados)
     {
         try
         {
@@ -118,7 +109,7 @@
     }
 
     //Funcion para cancelar la edicion
-    public async void CancelEdit(Grado grados)
+    public async void CancelEdit(Planilla grados)
     {
         GridGrado.CancelEditRow(grados);
         await RefreshGrado();
@@ -134,7 +125,7 @@
             var nombre = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Nombre");
             var profesorid = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Profesor ID");
 
-            var gradoAux = new Grado { id = id.ToUpper(), nombre = nombre, profesorid = profesorid };
+            var gradoAux = new Planilla { id = id.ToUpper(), nombre = nombre, profesorid = profesorid };
 
             await InsertGrado(gradoAux);
         }
@@ -145,17 +136,17 @@
     }
 
     //Insertar Grado
-    public async Task InsertGrado(Grado grados)
+    public async Task InsertGrado(Planilla grados)
     {
         try
         {
-            if (grado.Contains(new Grado { id = grados.id }))
+            if (grado.Contains(new Planilla { id = grados.id }))
             {
                 await JSRuntime.InvokeVoidAsync("alert", $"Ya existe un grado con el ID: {grados.id}");
             }
             else
             {
-                if (profesor.Contains(new Profesor {id = grados.profesorid }))
+                /*if (profesor.Contains(new Profesor {id = grados.profesorid }))
                 {
                     var responseInsertGrado = await Http.PutAsJsonAsync("api/Grado/insert_grado", grados);
                     if (responseInsertGrado.IsSuccessStatusCode)
@@ -171,7 +162,7 @@
                 else
                 {
                     await JSRuntime.InvokeVoidAsync("alert", $"No existe un profesor con el id {grados.profesorid}");
-                }
+                }*/
             }
         }
         catch (Exception ex)
@@ -186,12 +177,12 @@
     }
 
     //Funcion para editar grados
-    public async Task EditarGrados(Grado grado)
+    public async Task EditarGrados(Planilla grado)
     {
         try
         {
 
-            if (profesor.Contains(new Profesor {id = grado.profesorid}))
+            /*if (profesor.Contains(new Profesor {id = grado.profesorid}))
             {
                 var responseUpdateGrado = await Http.PutAsJsonAsync("api/Grado/update_grado", grado);
                 if (responseUpdateGrado.IsSuccessStatusCode)
@@ -208,7 +199,7 @@
             {
                 await JSRuntime.InvokeVoidAsync("alert", $"No existe un profesor con el id {grado.profesorid}");
 
-            }
+            }*/
 
         }
         catch (Exception ex)
@@ -223,7 +214,7 @@
     }
 
     //Funcion para eliminar grados
-    public async Task EliminarGrado(Grado grado)
+    public async Task EliminarGrado(Planilla grado)
     {
         try
         {
@@ -255,7 +246,7 @@
     {
         try
         {
-            var responseGrado = await Http.GetFromJsonAsync<List<Grado>>("api/Grado");
+            var responseGrado = await Http.GetFromJsonAsync<List<Planilla>>("api/Grado");
             grado = responseGrado.ToList();
         }
         catch (Exception ex)

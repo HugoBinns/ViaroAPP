@@ -15,17 +15,17 @@ namespace ViaroAPP.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AlumnoController : ControllerBase
+    public class EmpleadosController : ControllerBase
     {
         private readonly ViaroContext _context;
 
-        public AlumnoController(ViaroContext context)
+        public EmpleadosController(ViaroContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Alumno>>> GetAlumno()
+        public async Task<ActionResult<List<Empleado>>> GetAlumno()
         {
             var listAlumno = await _context.Alumno.ToListAsync();
             return Ok(listAlumno);
@@ -33,7 +33,7 @@ namespace ViaroAPP.Server.Controllers
 
         //Función de insert
         [HttpPut("insert_alumno")]
-        public IActionResult InsertAlumno(Alumno alumno)
+        public IActionResult InsertAlumno(Empleado alumno)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace ViaroAPP.Server.Controllers
         }
         //Función de update
         [HttpPut("update_alumno")]
-        public IActionResult UpdateAlumno(Alumno alumno)
+        public IActionResult UpdateAlumno(Empleado alumno)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace ViaroAPP.Server.Controllers
         }
         //Función de delete
         [HttpPut("delete_alumno")]
-        public IActionResult DeleteAlumno(Alumno alumno)
+        public IActionResult DeleteAlumno(Empleado alumno)
         {
             try
             {

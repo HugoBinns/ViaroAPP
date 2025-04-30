@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace ViaroAPP.Shared
 {
-    //Entidad de la tabla profesor
-    public class Profesor
+    //Entidad de la tabla grado
+    public class Planilla
     {
         public string id { get; set; }
         public string? nombre { get; set; }
-        public string? apellidos { get; set; }
-        public string? genero { get; set; }
+        public string profesorid { get; set; }
 
         public override bool Equals(object? obj)
         {
@@ -21,8 +20,8 @@ namespace ViaroAPP.Shared
                 return false;
             }
 
-            Profesor other = (Profesor)obj;
-            return id == other.id;
+            Planilla other = (Planilla)obj;
+            return (id == other.id);
         }
 
         public override int GetHashCode()

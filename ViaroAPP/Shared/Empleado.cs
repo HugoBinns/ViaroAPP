@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace ViaroAPP.Shared
 {
-    //Entidad de la tabla grado
-    public class Grado
+    //Entidad de la tabla alumno
+    public class Empleado
     {
         public string id { get; set; }
         public string? nombre { get; set; }
-        public string profesorid { get; set; }
+        public string? apellidos { get; set; }
+        public string? Genero { get; set; }
+        public DateTime? fecha_nacimiento { get; set; }
 
         public override bool Equals(object? obj)
         {
-            if (obj == null || GetType() != obj.GetType())
+            if (obj is Empleado other)
             {
-                return false;
+                return id == other.id;
             }
-
-            Grado other = (Grado)obj;
-            return (id == other.id);
+            return false;
         }
 
         public override int GetHashCode()
@@ -30,3 +30,4 @@ namespace ViaroAPP.Shared
         }
     }
 }
+

@@ -1,0 +1,286 @@
+﻿@page "/"
+@inject NotificationService NotificationService
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+@using ViaroAPP.Shared
+@using Radzen
+@using Radzen.Blazor
+
+<PageTitle>Planilla</PageTitle>
+
+<h2>Empleados</h2>
+
+<RadzenRow>
+    <RadzenDataGrid @ref="GridAlumno" TItem="Empleado" AllowFiltering="true" AllowColumnResize="true" AllowPaging="true" PageSize="3" AllowSorting="true" Data="@alumno" RowUpdate="@OnUpdateRow" ColumnWidth="200px" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selected_alumno EditMode="@editMode">
+        <HeaderTemplate>
+            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nuevo Alumno" Click="@InsertRow"/>
+        </HeaderTemplate>
+        <Columns>
+            <RadzenDataGridColumn Property="@nameof(Empleado.id)" Filterable="true" Title="ID" Width="80px" Frozen="true"/>
+            <RadzenDataGridColumn Property="@nameof(Empleado.nombre)" Filterable="true" Title="Nombre" Width="280px">
+                <EditTemplate Context="alumno">
+                    <RadzenTextBox @bind-Value="alumno.nombre" Style="width:280px;display:block" Name="Nombre"/>
+                    <RadzenRequiredValidator Text="Nombre en blanco" Component="Nombre" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(Empleado.apellidos)" Filterable="true" Title="Apellidos" Width="300px">
+                <EditTemplate Context="alumno">
+                    <RadzenTextBox @bind-Value="alumno.apellidos" Style="width:300px;display:block" Name="Apellidos"/>
+                    <RadzenRequiredValidator Text="Apellidos en blanco" Component="Apellidos" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(Empleado.Genero)" Filterable="true" Title="Género" Width="110px">
+                <EditTemplate Context="alumno">
+                    <RadzenTextBox @bind-Value="alumno.Genero" Style="width:110px;display:block" Name="Genero"/>
+                    <RadzenRequiredValidator Text="Género en blanco" Component="Genero" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(Empleado.fecha_nacimiento)" Filterable="true" Title="Fecha de Nacimiento" Width="230px">
+                <Template Context="alumno">
+                    @String.Format("{0:d}", alumno.fecha_nacimiento)
+                </Template>
+                <EditTemplate Context="alumno">
+                    <RadzenDatePicker @bind-Value="alumno.fecha_nacimiento" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select la fecha de nacimiento" }})"></RadzenDatePicker>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="alumno" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="80px"> 
+                <Template Context="alumno">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => EditRow(alumno))" @onclick:stopPropagation="true"></RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => EliminarAlumno(alumno))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="alumno">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" aria-label="Guardar" Click="@((args) => SaveRow(alumno))">
+                    </RadzenButton>
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" aria-label="Cancelar" Click="@((args) => CancelEdit(alumno))">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" aria-label="Delete" Click="@(args => EliminarAlumno(alumno))">
+                    </RadzenButton>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenRow>
+<br />
+
+
+@code {
+    public RadzenDataGrid<Empleado> GridAlumno;
+    public List<Empleado> alumno = new List<Empleado>();
+    public IList<Empleado> selected_alumno;
+
+    DataGridEditMode editMode =  DataGridEditMode.Single;
+
+    //Funcion Principal
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var responseAlumno = await Http.GetFromJsonAsync<List<Empleado>>("api/Alumno");
+            alumno = responseAlumno.ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    //------------------------------------------------------------------------------Funciones del Alummno--------------------------------------------------------------------------------------
+    //Evento OnUpDate del Grid
+    public async void OnUpdateRow(Empleado alumnos)
+    {
+        await EditarAlumnos(alumnos);
+    }
+
+    //Este es el evento Edit
+    public async Task EditRow(Empleado alumno)
+    {
+        await GridAlumno.EditRow(alumno);
+    }
+
+    //FuncionPara Guardar los cambios de la fila
+    public async Task SaveRow(Empleado alumnos)
+    {
+        try
+        {
+            await GridAlumno.UpdateRow(alumnos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    //Funcion para cancelar la edicion
+    public async void CancelEdit(Empleado alumnos)
+    {
+        GridAlumno.CancelEditRow(alumnos);
+        await RefreshAlumno();
+
+    }
+
+    //Funcion Para insertar un alumno
+    public async Task InsertRow()
+    {
+        try
+        {
+           
+            var id = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el ID");
+            var nombre = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Nombre");
+            var apellidos = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese los Apellidos");
+            var genero = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Género");
+            var fecnac = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese la fecha de nacimiento");
+
+            var alumnoAux = new Empleado { id = id.ToUpper(), nombre = nombre, apellidos = apellidos, Genero = genero.ToUpper(), fecha_nacimiento = DateTime.Parse(fecnac) };
+            await InsertAlumno(alumnoAux);
+
+            
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+    }
+
+    //Insertar Alumno
+    public async Task InsertAlumno(Empleado alumnos)
+    {
+        try
+        {
+            if (alumno.Contains(new Empleado { id = alumnos.id }))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Ya existe un alumno con el ID: {alumnos.id}");
+            }
+            else
+            {
+                var responseInsertAlumno = await Http.PutAsJsonAsync("api/Alumno/insert_alumno", alumnos);
+                if (responseInsertAlumno.IsSuccessStatusCode)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", $"Se ha ingresado al alumno {alumnos.nombre} {alumnos.apellidos}, con ID {alumnos.id}");
+                }
+                else
+                {
+                    var InsertResponse = await responseInsertAlumno.Content.ReadAsStringAsync();
+                    throw new Exception(InsertResponse);
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al insertar al alumno {ex.Message}");
+        }
+        finally
+        {
+            await RefreshAlumno();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    //Funcion para editar alumnos
+    public async Task EditarAlumnos(Empleado alumno)
+    {
+        try
+        {
+
+            var responseUpdateAlumno = await Http.PutAsJsonAsync("api/Alumno/update_alumno", alumno);
+            if (responseUpdateAlumno.IsSuccessStatusCode)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Se ha actualizado al alumno {alumno.id}, {alumno.nombre}");
+            }
+            else
+            {
+                var UpdateResponse = await responseUpdateAlumno.Content.ReadAsStringAsync();
+                throw new Exception(UpdateResponse);
+            }
+            
+        }
+        catch(Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al actualizar {alumno.id}. {ex.Message}");
+        }
+        finally
+        {
+            await RefreshAlumno();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    //Funcion para eliminar alumnos
+    public async Task EliminarAlumno(Empleado alumno)
+    {
+        try
+        {
+            bool Confirmacion = await JSRuntime.InvokeAsync<bool>("confirm", "Desea eliminar al alumno?");
+
+            if (Confirmacion)
+            {
+                var responseDeleteAlumno = await Http.PutAsJsonAsync("api/Alumno/delete_alumno", alumno);
+                if (responseDeleteAlumno.IsSuccessStatusCode)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", $"Se ha eliminado al alumno {alumno.nombre} {alumno.apellidos}, con ID: {alumno.id}");
+                }
+                else
+                {
+                    var DeleteResponse = await responseDeleteAlumno.Content.ReadAsStringAsync();
+                    throw new Exception(DeleteResponse);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al eliminar al alumno {alumno.id}. {ex.Message}");
+        }
+        finally
+        {
+            await RefreshAlumno();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+
+    //RefreshAlumno
+    public async Task RefreshAlumno()
+    {
+        try
+        {
+            var responseAlumno = await Http.GetFromJsonAsync<List<Empleado>>("api/Alumno");
+            alumno = responseAlumno.ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    //------------------------------------------------------------------------------Funciones Globales--------------------------------------------------------------------------------------
+    public async Task Refresh()
+    {
+        try
+        {
+            var responseAlumno = await Http.GetFromJsonAsync<List<Empleado>>("api/Alumno");
+            alumno = responseAlumno.ToList();
+
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    
+
+}
+

@@ -5,43 +5,44 @@ using ViaroAPP.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.Sql;
 
 namespace ViaroAPP.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProfesorController : ControllerBase
+    public class PlanillaController : ControllerBase
     {
         private readonly ViaroContext _context;
 
-        public ProfesorController(ViaroContext context)
+        public PlanillaController(ViaroContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Profesor>>> GetProfesor()
+        public async Task<ActionResult<List<Planilla>>> GetGrado()
         {
-            var listProfesor = await _context.Profesor.ToListAsync();
-            return Ok(listProfesor);
+            var listGrado = await _context.Grado.ToListAsync();
+            return Ok(listGrado);
         }
 
+
         //Función de insert
-        [HttpPut("insert_profesor")]
-        public IActionResult InsertProfesor(Profesor Profesor)
+        [HttpPut("insert_grado")]
+        public IActionResult InsertGrado(Planilla Grado)
         {
             try
             {
                 using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
                 {
                     connection.Open();
-                    using (var cmd = new SqlCommand("sp_InsertProfesor", connection))
+                    using (var cmd = new SqlCommand("sp_InsertGrado", connection))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id", Profesor.id);
-                        cmd.Parameters.AddWithValue("@nombre", Profesor.nombre);
-                        cmd.Parameters.AddWithValue("@apellidos", Profesor.apellidos);
-                        cmd.Parameters.AddWithValue("@genero", Profesor.genero);
+                        cmd.Parameters.AddWithValue("@id", Grado.id);
+                        cmd.Parameters.AddWithValue("@nombre", Grado.nombre);
+                        cmd.Parameters.AddWithValue("@profesorid", Grado.profesorid);
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -54,21 +55,20 @@ namespace ViaroAPP.Server.Controllers
             return NoContent();
         }
         //Función de update
-        [HttpPut("update_profesor")]
-        public IActionResult UpdateProfesor(Profesor Profesor)
+        [HttpPut("update_grado")]
+        public IActionResult UpdateGrado(Planilla Grado)
         {
             try
             {
                 using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
                 {
                     connection.Open();
-                    using (var cmd = new SqlCommand("sp_UpdateProfesor", connection))
+                    using (var cmd = new SqlCommand("sp_UpdateGrado", connection))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id", Profesor.id);
-                        cmd.Parameters.AddWithValue("@nombre", Profesor.nombre);
-                        cmd.Parameters.AddWithValue("@apellidos", Profesor.apellidos);
-                        cmd.Parameters.AddWithValue("@genero", Profesor.genero);
+                        cmd.Parameters.AddWithValue("@id", Grado.id);
+                        cmd.Parameters.AddWithValue("@nombre", Grado.nombre);
+                        cmd.Parameters.AddWithValue("@profesorid", Grado.profesorid);
                         cmd.ExecuteNonQuery();
                     }
                 };
@@ -81,18 +81,18 @@ namespace ViaroAPP.Server.Controllers
             return NoContent();
         }
         //Función de delete
-        [HttpPut("delete_profesor")]
-        public IActionResult DeleteProfesor(Profesor Profesor)
+        [HttpPut("delete_grado")]
+        public IActionResult DeleteGrado(Planilla Grado)
         {
             try
             {
                 using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
                 {
                     connection.Open();
-                    using (var cmd = new SqlCommand("sp_DeleteProfesor", connection))
+                    using (var cmd = new SqlCommand("sp_DeleteGrado", connection))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id", Profesor.id);
+                        cmd.Parameters.AddWithValue("@id", Grado.id);
                         cmd.ExecuteNonQuery();
                     }
                 };
