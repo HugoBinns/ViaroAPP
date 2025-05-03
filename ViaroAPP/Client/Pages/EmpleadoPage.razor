@@ -9,8 +9,10 @@
 @using Radzen.Blazor
 @using ViaroAPP.Client.Pages.EmpleadosAssets
 
+
 <PageTitle>Planilla</PageTitle>
 
+<br />
 <h2>Empleados</h2>
 
 <RadzenRow>
@@ -23,6 +25,9 @@
             @bind-Value=@selected_empleado Style="width:100%;">
                 <HeaderTemplate>
                     <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nuevo empleado" Click="AbrirModalCrearEmpleado" />
+
+                    <RadzenUpload ChooseText="Importar empleados" Accept=".csv" Change="OnUploadChange" />
+
                 </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Property="@nameof(Empleado.codigo)" Filterable="true" Title="Código Empleado" Frozen="true" />
@@ -50,6 +55,10 @@
     public RadzenDataGrid<Empleado> GridEmpleado;
     public List<Empleado> empleado = new List<Empleado>();
     public IList<Empleado> selected_empleado;
+
+    public EmpleadoPage()
+    {
+    }
 
     //DataGridEditMode editMode =  DataGridEditMode.Single;
 
@@ -173,6 +182,87 @@
         DialogSerive.Open<CrearEmpleados>("Crear Nuevo Empleado");
         await ObtenerEmpleados();
     }
+
+
+
+
+
+    private async Task OnUploadChange(UploadChangeEventArgs args)
+    {
+        try
+        {
+            foreach (var file in args.Files)
+            {
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB límite
+                using var reader = new StreamReader(stream);
+                var content = await reader.ReadToEndAsync();
+                var empleados = ParseCsv(content);
+                await ImportarEmpleados(empleados);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
+
+    private List<Empleado> ParseCsv(string csvContent)
+    {
+        var empleados = new List<Empleado>();
+        using var reader = new StringReader(csvContent);
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+            };
+        using var csv = new CsvReader(reader, config);
+
+        // Leer la primera línea (cabecera)
+        csv.Read();
+        csv.ReadHeader();
+
+        // Leer los registros
+        while (csv.Read())
+        {
+            var empleado = new Empleado
+                {
+                    codigo = csv.GetField<string>("codigo"),
+                    nombre = csv.GetField<string>("nombre"),
+                    segundoNombre = csv.GetField<string>("segundoNombre"),
+                    apellidoPaterno = csv.GetField<string>("apellidoPaterno"),
+                    apellidoMaterno = csv.GetField<string>("apellidoMaterno"),
+                    cedula = csv.GetField<string>("cedula"),
+                    salarioHora = csv.GetField<float>("salarioHora"),
+                    idCargo = csv.GetField<int>("idCargo")
+                };
+            empleados.Add(empleado);
+        }
+        return empleados;
+    }
+
+
+    private async Task ImportarEmpleados(List<Empleado> empleados)
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Empleados/Importar", empleados);
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Empleados Importados", "Los empleados han sido importados correctamente.");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.Notify(NotificationSeverity.Error, "Error", error);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
+
+
+
 
 
 }

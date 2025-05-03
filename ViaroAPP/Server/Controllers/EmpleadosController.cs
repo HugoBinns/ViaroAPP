@@ -106,5 +106,34 @@ namespace ViaroAPP.Server.Controllers
 
             return Ok();
         }
+
+        [HttpPost("Importar")]
+        public async Task<ActionResult> ImportarEmpleados(List<Empleado> empleados)
+        {
+            var codigosExistentes = await _context.Empleados
+                .Select(e => e.Codigo)
+                .ToListAsync();
+
+            var nuevosEmpleados = empleados
+                .Where(e => !codigosExistentes.Contains(e.codigo))
+                .Select(model => new Data.Entities.Empleado
+                {
+                    Codigo = model.codigo,
+                    Nombre = model.nombre,
+                    SegundoNombre = model.segundoNombre,
+                    ApellidoPaterno = model.apellidoPaterno,
+                    ApellidoMaterno = model.apellidoMaterno,
+                    Cedula = model.cedula,
+                    SalarioHora = model.salarioHora,
+                    IdCargo = model.idCargo
+                }).ToList();
+
+            _context.Empleados.AddRange(nuevosEmpleados);
+            await _context.SaveChangesAsync();
+
+            return Ok($"{nuevosEmpleados.Count} empleados importados correctamente.");
+        }
+
+
     }
 }
