@@ -17,18 +17,18 @@ namespace ViaroAPP.Server.Controllers
     [ApiController]
     public class EmpleadosController : ControllerBase
     {
-        private readonly Data.AppDbContext _context;
+        private readonly AppDbContext _context;
 
-        public EmpleadosController(Data.AppDbContext context)
+        public EmpleadosController(AppDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Empleado>>> GetAlumno()
+        public async Task<ActionResult<List<Empleado>>> GetEmpleados()
         {
-            var listAlumno = await _context.Empleados.ToListAsync();
-            return Ok(listAlumno);
+            var listEmpleados = await _context.Empleados.ToListAsync();
+            return Ok(listEmpleados);
         }
 
         [HttpGet("{codigo}")]
@@ -38,7 +38,7 @@ namespace ViaroAPP.Server.Controllers
             if (e == null)
                 return NotFound();
 
-            return new Shared.Empleado
+            return new Empleado
             {
                 codigo = e.Codigo,
                 nombre = e.Nombre,

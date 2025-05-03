@@ -1,4 +1,5 @@
-﻿@inject HttpClient Http
+﻿@page "/crear-empleado"
+@inject HttpClient Http
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 
@@ -39,18 +40,34 @@
         </RadzenRow>
         <RadzenRow>
             <RadzenColumn Width="100%">
-                <RadzenNumeric @bind-Value="empleado.idCargo" Name="idCargo" Placeholder="Id Cargo" Style="width: 100%; margin-bottom: 10px;" />
+                <RadzenDropDown TValue="int" @bind-Value="empleado.idCargo" Data="@cargos" TextProperty="@nameof(Cargos.NombreCargo)" ValueProperty="@nameof(Cargos.Id)" Placeholder="Seleccione un Cargo" Style="width: 100%; margin-bottom: 10px;" />
             </RadzenColumn>
         </RadzenRow>
         <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Guardar" Type="submit" Style="margin-top: 20px;" />
     </RadzenFieldset>
 </RadzenTemplateForm>
 
-
-
-
 @code {
     private Empleado empleado = new Empleado();
+    private List<Cargos> cargos = new List<Cargos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarCargos();
+    }
+
+    private async Task CargarCargos()
+    {
+        try
+        {
+            var responseCargos = await Http.GetFromJsonAsync<List<Cargos>>("api/Cargos");
+            cargos = responseCargos.ToList();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
 
     private async Task CrearEmpleado()
     {
