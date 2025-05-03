@@ -1,0 +1,11 @@
+﻿@page "/prueba-dialogo"
+@inject DialogService DialogService
+
+<RadzenButton Text="Abrir Dialogo" Click="AbrirDialogo" />
+
+@code {
+    private void AbrirDialogo()
+    {
+        DialogService.Open<DialogoPrueba>("Prueba de Dialogo");
+    }
+}

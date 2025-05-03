@@ -1,0 +1,76 @@
+﻿@inject HttpClient Http
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+@using ViaroAPP.Shared
+@using Radzen
+@using Radzen.Blazor
+
+<RadzenTemplateForm TItem="Empleado" Data="@empleado" Submit="@CrearEmpleado">
+    <RadzenFieldset Text="Nuevo Empleado" Style="margin: 20px;">
+        <RadzenRow>
+            <RadzenColumn Width="100%">
+                <RadzenTextBox @bind-Value="empleado.codigo" Name="codigo" Placeholder="Código" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Width="50%">
+                <RadzenTextBox @bind-Value="empleado.nombre" Name="nombre" Placeholder="Primer Nombre" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+            <RadzenColumn Width="50%">
+                <RadzenTextBox @bind-Value="empleado.segundoNombre" Name="segundoNombre" Placeholder="Segundo Nombre" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Width="50%">
+                <RadzenTextBox @bind-Value="empleado.apellidoPaterno" Name="apellidoPaterno" Placeholder="Apellido Paterno" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+            <RadzenColumn Width="50%">
+                <RadzenTextBox @bind-Value="empleado.apellidoMaterno" Name="apellidoMaterno" Placeholder="Apellido Materno" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Width="50%">
+                <RadzenTextBox @bind-Value="empleado.cedula" Name="cedula" Placeholder="Cédula" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+            <RadzenColumn Width="50%">
+                <RadzenNumeric @bind-Value="empleado.salarioHora" Name="salarioHora" Placeholder="Salario Por Hora" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Width="100%">
+                <RadzenNumeric @bind-Value="empleado.idCargo" Name="idCargo" Placeholder="Id Cargo" Style="width: 100%; margin-bottom: 10px;" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Text="Guardar" Type="submit" Style="margin-top: 20px;" />
+    </RadzenFieldset>
+</RadzenTemplateForm>
+
+
+
+
+@code {
+    private Empleado empleado = new Empleado();
+
+    private async Task CrearEmpleado()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Empleados", empleado);
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Empleado Creado", "El empleado ha sido creado correctamente.");
+                DialogService.Close();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.Notify(NotificationSeverity.Error, "Error", error);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
+}

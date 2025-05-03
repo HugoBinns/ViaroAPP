@@ -1,0 +1,10 @@
+﻿@page "/dialogo-prueba"
+
+@using Radzen
+@using Radzen.Blazor
+
+@inject DialogService DialogService
+
+<RadzenFieldset Text="Dialogo de Prueba">
+    <RadzenButton Text="Cerrar" Click="@(args => DialogService.Close())" />
+</RadzenFieldset>

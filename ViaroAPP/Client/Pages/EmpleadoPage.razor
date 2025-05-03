@@ -2,10 +2,12 @@
 @inject NotificationService NotificationService
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
+@inject DialogService DialogSerive
 
 @using ViaroAPP.Shared
 @using Radzen
 @using Radzen.Blazor
+@using ViaroAPP.Client.Pages.EmpleadosAssets
 
 <PageTitle>Planilla</PageTitle>
 
@@ -16,11 +18,11 @@
         <div class="grid-container shadow-sm">
             <!-- Contenedor con scroll controlado -->
             <RadzenDataGrid @ref="GridEmpleado" TItem="Empleado" AllowFiltering="true" AllowColumnResize="true"
-                                                       AllowPaging="true" PageSize="3" AllowSorting="true" Data="@empleado"
-                                                       SelectionMode="DataGridSelectionMode.Single"
-                            @bind-Value=@selected_empleado EditMode="@editMode" Style="width:100%;">
+            AllowPaging="true" PageSize="3" AllowSorting="true" Data="@empleado"
+            SelectionMode="DataGridSelectionMode.Single"
+            @bind-Value=@selected_empleado Style="width:100%;">
                 <HeaderTemplate>
-                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nuevo empleado" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Nuevo empleado" Click="AbrirModalCrearEmpleado" />
                 </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Property="@nameof(Empleado.codigo)" Filterable="true" Title="Código Empleado" Frozen="true" />
@@ -31,20 +33,11 @@
                     <RadzenDataGridColumn Property="@nameof(Empleado.salarioHora)" Filterable="true" Title="Salario Por Hora" />
                     <RadzenDataGridColumn Property="@nameof(Empleado.idCargo)" Filterable="true" Title="Id Cargo"  />
 
-                    <RadzenDataGridColumn Context="empleado" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="120px">
+                    <RadzenDataGridColumn Context="empleado" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="80px">
                         <Template Context="empleado">
-                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" @onclick:stopPropagation="true"></RadzenButton>
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" @onclick:stopPropagation="true">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@(args => EliminarEmpleado(empleado.codigo))" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" @onclick:stopPropagation="true">
                             </RadzenButton>
                         </Template>
-                        <EditTemplate Context="empleado">
-                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" aria-label="Guardar">
-                            </RadzenButton>
-                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" aria-label="Cancelar">
-                            </RadzenButton>
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" aria-label="Delete">
-                            </RadzenButton>
-                        </EditTemplate>
                     </RadzenDataGridColumn>
                 </Columns>
             </RadzenDataGrid>
@@ -58,7 +51,7 @@
     public List<Empleado> empleado = new List<Empleado>();
     public IList<Empleado> selected_empleado;
 
-    DataGridEditMode editMode =  DataGridEditMode.Single;
+    //DataGridEditMode editMode =  DataGridEditMode.Single;
 
     //Funcion Principal
     protected override async Task OnInitializedAsync()
@@ -78,59 +71,30 @@
         }
     }
 
-    /*
-    //------------------------------------------------------------------------------Funciones del Alummno--------------------------------------------------------------------------------------
-    //Evento OnUpDate del Grid
-    public async void OnUpdateRow(Empleado empleados)
-    {
-        await Editarempleados(empleados);
-    }
-
-    //Este es el evento Edit
-    public async Task EditRow(Empleado empleado)
-    {
-        await GridEmpleado.EditRow(empleado);
-    }
-
-    //FuncionPara Guardar los cambios de la fila
-    public async Task SaveRow(Empleado empleados)
+    private async Task ObtenerEmpleados()
     {
         try
         {
-            await GridEmpleado.UpdateRow(empleados);
+            var responseEmpleado = await Http.GetFromJsonAsync<List<Empleado>>("api/Empleados");
+            empleado = responseEmpleado.ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
         }
     }
 
-    
-    //Funcion para cancelar la edicion
-    public async void CancelEdit(Empleado empleados)
-    {
-        GridEmpleado.CancelEditRow(empleados);
-        await Refreshempleado();
 
-    }
-
-    
-    //Funcion Para insertar un empleado
-    public async Task InsertRow()
+    private async Task ObtenerEmpleadoPorCodigo(string codigo)
     {
         try
         {
-           
-            var id = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el ID");
-            var nombre = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Nombre");
-            var apellidos = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese los Apellidos");
-            var genero = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese el Género");
-            var fecnac = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese la fecha de nacimiento");
-
-            var empleadoAux = new Empleado { id = id.ToUpper(), nombre = nombre, apellidos = apellidos, Genero = genero.ToUpper(), fecha_nacimiento = DateTime.Parse(fecnac) };
-            await Insertempleado(empleadoAux);
-
-            
+            var responseEmpleado = await Http.GetFromJsonAsync<Empleado>($"api/Empleados/{codigo}");
+            // Manejar el empleado obtenido
         }
         catch (Exception ex)
         {
@@ -138,140 +102,78 @@
         }
     }
 
-    //Insertar empleado
-    public async Task Insertempleado(Empleado empleados)
+
+    private async Task CrearEmpleado(Empleado nuevoEmpleado)
     {
         try
         {
-            if (empleado.Contains(new Empleado { id = empleados.id }))
+            var response = await Http.PostAsJsonAsync("api/Empleados", nuevoEmpleado);
+            if (response.IsSuccessStatusCode)
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Ya existe un empleado con el ID: {empleados.id}");
+                await ObtenerEmpleados(); // Actualizar la lista de empleados
             }
             else
             {
-                var responseInsertempleado = await Http.PutAsJsonAsync("api/empleado/insert_empleado", empleados);
-                if (responseInsertempleado.IsSuccessStatusCode)
-                {
-                    await JSRuntime.InvokeVoidAsync("alert", $"Se ha ingresado al empleado {empleados.nombre} {empleados.apellidos}, con ID {empleados.id}");
-                }
-                else
-                {
-                    var InsertResponse = await responseInsertempleado.Content.ReadAsStringAsync();
-                    throw new Exception(InsertResponse);
-                }
+                var error = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", error);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error al insertar al empleado {ex.Message}");
-        }
-        finally
-        {
-            await Refreshempleado();
-            await InvokeAsync(StateHasChanged);
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
         }
     }
 
-    //Funcion para editar empleados
-    public async Task Editarempleados(Empleado empleado)
+    private async Task ActualizarEmpleado(string codigo, Empleado empleadoActualizado)
     {
         try
         {
-
-            var responseUpdateempleado = await Http.PutAsJsonAsync("api/empleado/update_empleado", empleado);
-            if (responseUpdateempleado.IsSuccessStatusCode)
+            var response = await Http.PutAsJsonAsync($"api/Empleados/{codigo}", empleadoActualizado);
+            if (response.IsSuccessStatusCode)
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Se ha actualizado al empleado {empleado.id}, {empleado.nombre}");
+                await ObtenerEmpleados(); // Actualizar la lista de empleados
             }
             else
             {
-                var UpdateResponse = await responseUpdateempleado.Content.ReadAsStringAsync();
-                throw new Exception(UpdateResponse);
+                var error = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", error);
             }
-            
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error al actualizar {empleado.id}. {ex.Message}");
-        }
-        finally
-        {
-            await Refreshempleado();
-            await InvokeAsync(StateHasChanged);
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
         }
     }
 
-    //Funcion para eliminar empleados
-    public async Task Eliminarempleado(Empleado empleado)
+    private async Task EliminarEmpleado(string codigo)
     {
         try
         {
-            bool Confirmacion = await JSRuntime.InvokeAsync<bool>("confirm", "Desea eliminar al empleado?");
-
-            if (Confirmacion)
+            var response = await Http.DeleteAsync($"api/Empleados/{codigo}");
+            if (response.IsSuccessStatusCode)
             {
-                var responseDeleteempleado = await Http.PutAsJsonAsync("api/empleado/delete_empleado", empleado);
-                if (responseDeleteempleado.IsSuccessStatusCode)
-                {
-                    await JSRuntime.InvokeVoidAsync("alert", $"Se ha eliminado al empleado {empleado.nombre} {empleado.apellidos}, con ID: {empleado.id}");
-                }
-                else
-                {
-                    var DeleteResponse = await responseDeleteempleado.Content.ReadAsStringAsync();
-                    throw new Exception(DeleteResponse);
-                }
+                await ObtenerEmpleados(); // Actualizar la lista de empleados
+                NotificationService.Notify(NotificationSeverity.Success, "Empleado Eliminado", $"El empleado con código {codigo} ha sido eliminado correctamente.");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", error);
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error al eliminar al empleado {empleado.id}. {ex.Message}");
-        }
-        finally
-        {
-            await Refreshempleado();
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-
-    //Refreshempleado
-    public async Task Refreshempleado()
-    {
-        try
-        {
-            var responseempleado = await Http.GetFromJsonAsync<List<Empleado>>("api/empleado");
-            empleado = responseempleado.ToList();
-        }
-        catch (Exception ex)
-        {
             await JSRuntime.InvokeVoidAsync("alert", ex.Message);
         }
-        finally
-        {
-            await InvokeAsync(StateHasChanged);
-        }
     }
 
-    //------------------------------------------------------------------------------Funciones Globales--------------------------------------------------------------------------------------
-    public async Task Refresh()
+
+    private async void AbrirModalCrearEmpleado()
     {
-        try
-        {
-            var responseempleado = await Http.GetFromJsonAsync<List<Empleado>>("api/empleado");
-            empleado = responseempleado.ToList();
-
-        }
-        catch (Exception ex)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
-        }
-        finally
-        {
-            await InvokeAsync(StateHasChanged);
-        }
+        DialogSerive.Open<CrearEmpleados>("Crear Nuevo Empleado");
+        await ObtenerEmpleados();
     }
 
-    */
 
 }
 

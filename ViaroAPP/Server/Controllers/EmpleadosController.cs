@@ -32,7 +32,7 @@ namespace ViaroAPP.Server.Controllers
         }
 
         [HttpGet("{codigo}")]
-        public async Task<ActionResult<Shared.Empleado>> GetEmpleado(string codigo)
+        public async Task<ActionResult<Empleado>> GetEmpleado(string codigo)
         {
             var e = await _context.Empleados.FindAsync(codigo);
             if (e == null)
