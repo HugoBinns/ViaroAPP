@@ -31,85 +31,80 @@ namespace ViaroAPP.Server.Controllers
             return Ok(listAlumno);
         }
 
-        //Función de insert
-        [HttpPut("insert_alumno")]
-        public IActionResult InsertAlumno(Empleado alumno)
+        [HttpGet("{codigo}")]
+        public async Task<ActionResult<Shared.Empleado>> GetEmpleado(string codigo)
         {
-            try
-            {
-                using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
-                {
-                    connection.Open();
-                    using (var cmd = new SqlCommand("sp_InsertAlumno", connection))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id", alumno.id);
-                        cmd.Parameters.AddWithValue("@nombre", alumno.nombre);
-                        cmd.Parameters.AddWithValue("@apellidos", alumno.apellidos);
-                        cmd.Parameters.AddWithValue("@genero", alumno.Genero);
-                        cmd.Parameters.AddWithValue("@fecha_nacimiento", alumno.fecha_nacimiento);
-                        cmd.ExecuteNonQuery();
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            var e = await _context.Empleados.FindAsync(codigo);
+            if (e == null)
+                return NotFound();
 
-            return NoContent();
+            return new Shared.Empleado
+            {
+                codigo = e.Codigo,
+                nombre = e.Nombre,
+                segundoNombre = e.SegundoNombre,
+                apellidoPaterno = e.ApellidoPaterno,
+                apellidoMaterno = e.ApellidoMaterno,
+                cedula = e.Cedula,
+                salarioHora = e.SalarioHora,
+                idCargo = e.IdCargo ?? 0
+            };
         }
-        //Función de update
-        [HttpPut("update_alumno")]
-        public IActionResult UpdateAlumno(Empleado alumno)
-        {
-            try
-            {
-                using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
-                {
-                    connection.Open();
-                    using (var cmd = new SqlCommand("sp_UpdateAlumno", connection))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id", alumno.id);
-                        cmd.Parameters.AddWithValue("@nombre", alumno.nombre);
-                        cmd.Parameters.AddWithValue("@apellidos", alumno.apellidos);
-                        cmd.Parameters.AddWithValue("@genero", alumno.Genero);
-                        cmd.Parameters.AddWithValue("@fecha_nacimiento", alumno.fecha_nacimiento);
-                        cmd.ExecuteNonQuery();
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
 
-            return NoContent();
+        [HttpPost]
+        public async Task<ActionResult> CrearEmpleado(Empleado model)
+        {
+            if (await _context.Empleados.AnyAsync(e => e.Codigo == model.codigo))
+                return Conflict("Ya existe un empleado con ese código.");
+
+            var empleado = new Data.Entities.Empleado
+            {
+                Codigo = model.codigo,
+                Nombre = model.nombre,
+                SegundoNombre = model.segundoNombre,
+                ApellidoPaterno = model.apellidoPaterno,
+                ApellidoMaterno = model.apellidoMaterno,
+                Cedula = model.cedula,
+                SalarioHora = model.salarioHora,
+                IdCargo = model.idCargo
+            };
+
+            _context.Empleados.Add(empleado);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
-        //Función de delete
-        [HttpPut("delete_alumno")]
-        public IActionResult DeleteAlumno(Empleado alumno)
-        {
-            try
-            {
-                using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
-                {
-                    connection.Open();
-                    using (var cmd = new SqlCommand("sp_DeleteAlumno", connection))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@id", alumno.id);
-                        cmd.ExecuteNonQuery();
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
 
-            return NoContent();
+        [HttpPut("{codigo}")]
+        public async Task<ActionResult> ActualizarEmpleado(string codigo, Empleado model)
+        {
+            var empleado = await _context.Empleados.FindAsync(codigo);
+            if (empleado == null)
+                return NotFound();
+
+            empleado.Nombre = model.nombre;
+            empleado.SegundoNombre = model.segundoNombre;
+            empleado.ApellidoPaterno = model.apellidoPaterno;
+            empleado.ApellidoMaterno = model.apellidoMaterno;
+            empleado.Cedula = model.cedula;
+            empleado.SalarioHora = model.salarioHora;
+            empleado.IdCargo = model.idCargo;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpDelete("{codigo}")]
+        public async Task<ActionResult> EliminarEmpleado(string codigo)
+        {
+            var empleado = await _context.Empleados.FindAsync(codigo);
+            if (empleado == null)
+                return NotFound();
+
+            _context.Empleados.Remove(empleado);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }
